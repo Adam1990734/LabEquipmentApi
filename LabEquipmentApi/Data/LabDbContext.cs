@@ -30,7 +30,7 @@ namespace LabEquipmentApi.Data
                     },
                     new Equipment()
                     {
-                        Id = 2,
+                        Id = 3,
                         Name = "Monitor",
                         Room = "Lab 11",
                         IsAvailable = true
