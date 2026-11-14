@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LabEquipmentApi.Data;
 using LabEquipmentApi.Domain;
+using Mapster;
+using LabEquipmentApi.Contracts;
 
 namespace LabEquipmentApi.Controllers
 {
@@ -103,6 +105,16 @@ namespace LabEquipmentApi.Controllers
         private bool EquipmentExists(int id)
         {
             return _context.EquipmentItems.Any(e => e.Id == id);
+        }
+
+        [HttpGet("available")]
+        public async Task<IActionResult> GetAllAvailable()
+        {
+            var equipments = await this._context.EquipmentItems.Where(e => e.IsAvailable)
+                                                         .OrderBy(e => e.Name)
+                                                         .ProjectToType<EquipmentListItemResponse>()
+                                                         .ToListAsync();
+            return Ok(equipments);
         }
     }
 }
