@@ -1,3 +1,4 @@
+using FluentValidation;
 using LabEquipmentApi.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,8 @@ builder.Services.AddDbContext<LabDbContext>(opt =>
         builder.Configuration.GetConnectionString("LabEquipmentDB")
     )
 );
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 

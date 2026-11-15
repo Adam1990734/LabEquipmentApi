@@ -1,4 +1,4 @@
-﻿namespace LabEquipmentApi.Contracts
+﻿namespace LabEquipmentApi.Contracts.Equipment
 {
     public class EquipmentListItemResponse
     {

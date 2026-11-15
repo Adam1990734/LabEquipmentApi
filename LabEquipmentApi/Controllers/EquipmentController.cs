@@ -8,7 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using LabEquipmentApi.Data;
 using LabEquipmentApi.Domain;
 using Mapster;
-using LabEquipmentApi.Contracts;
+using LabEquipmentApi.Contracts.Equipment;
+using FluentValidation;
 
 namespace LabEquipmentApi.Controllers
 {
@@ -17,10 +18,12 @@ namespace LabEquipmentApi.Controllers
     public class EquipmentController : ControllerBase
     {
         private readonly LabDbContext _context;
+        private readonly IValidator<CreateEquipmentRequest> _createValidator;
 
-        public EquipmentController(LabDbContext context)
+        public EquipmentController(LabDbContext context, IValidator<CreateEquipmentRequest> createValidator)
         {
             _context = context;
+            _createValidator = createValidator;
         }
 
         // GET: api/Equipment
@@ -78,12 +81,21 @@ namespace LabEquipmentApi.Controllers
         // POST: api/Equipment
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Equipment>> PostEquipment(Equipment equipment)
+        public async Task<ActionResult<Equipment>> PostEquipment(CreateEquipmentRequest equipment)
         {
-            _context.EquipmentItems.Add(equipment);
+            var validationResult = await _createValidator.ValidateAsync(equipment);
+            if(!validationResult.IsValid)
+            {
+                foreach (var error in validationResult.Errors)
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                return ValidationProblem(ModelState);
+            }
+            var newEquipment = equipment.Adapt<Equipment>();
+            newEquipment.IsAvailable = true;
+            _context.EquipmentItems.Add(newEquipment);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetEquipment", new { id = equipment.Id }, equipment);
+            return CreatedAtAction("GetEquipment", new { id = newEquipment.Id }, newEquipment.Id);
         }
 
         // DELETE: api/Equipment/5
