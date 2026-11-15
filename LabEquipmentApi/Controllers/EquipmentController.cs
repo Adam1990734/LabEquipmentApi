@@ -128,5 +128,20 @@ namespace LabEquipmentApi.Controllers
                                                          .ToListAsync();
             return Ok(equipments);
         }
+
+        //Szorgalmi:
+        [HttpGet("room-summary")]
+        public async Task<IActionResult> GetSummaryByRoom()
+        {
+            var equipments = await this._context.EquipmentItems.GroupBy(eq => eq.Room)
+                                                               .Select(eq => new RoomSummaryResponse()
+                                                               {
+                                                                   Room = eq.Key,
+                                                                   TotalCount = eq.Count(),
+                                                                   AvailableCount = eq.Count(e => e.IsAvailable)
+                                                               })
+                                                               .ToListAsync();
+            return Ok(equipments);
+        }
     }
 }
